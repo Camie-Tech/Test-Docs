@@ -1,0 +1,49 @@
+---
+title: Dynamic Deployment Hooks
+description: How Camie Docs reacts to GitHub updates and rebuilds your documentation automatically.
+tags:
+  - deployment
+  - automation
+  - github
+  - hooks
+---
+
+import { useState } from "react";
+
+# Dynamic Deployment Hooks ⚙️
+
+Camie Docs supports a **live sync** pipeline between GitHub and your hosted documentation.  
+Every time you push to your repo, a lightweight automation engine decides **what to rebuild** — only content, or the entire frontend.
+
+---
+
+## 🧩 Overview
+
+When a connected repository receives a new commit:
+
+1. The **Webhook listener** receives the push event.
+2. The **Automation Service**:
+   - Pulls updated content.
+   - Updates `meta.json` navigation.
+   - Detects affected scopes (content-only or full build).
+3. The **Dynamic Builder** triggers:
+   - 🧠 Content rebuild → Markdown → MDX → compiled docs.
+   - ⚡ Full frontend rebuild → Next.js build & deploy.
+
+---
+
+## 🔁 Smart Rebuild Logic (Concept)
+
+```ts
+// pseudo-code used inside backend automation
+async function handlePush(repo, branch, filesChanged) {
+  const isContentOnly = filesChanged.every((f) => f.startsWith("docs/") || f.endsWith(".mdx"));
+
+  if (isContentOnly) {
+    console.log("🔄 Rebuilding docs content only...");
+    await rebuildDocsSection(repo);
+  } else {
+    console.log("🚀 Full rebuild triggered...");
+    await rebuildFrontend(repo);
+  }
+}
